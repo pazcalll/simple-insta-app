@@ -73,16 +73,22 @@ class AuthController extends Controller implements HasMiddleware
         }
     }
 
-    public function destroy(Request $request, User $user)
+    public function destroy(Request $request, User $auth)
     {
-        $user = $request->user();
+        $loggedInUser = $request->user();
 
-        if ($user) {
-            $user->currentAccessToken()->delete();
+        if ($loggedInUser->id == $auth->id) {
+            $loggedInUser->currentAccessToken()->delete();
             return apiResponse(
                 data: [],
                 message: 'User logged out successfully',
                 statusCode: 200,
+            );
+        }
+        else {
+            return apiErrorResponse(
+                message: 'Unauthorized',
+                statusCode: 403,
             );
         }
 
