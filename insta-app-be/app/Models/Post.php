@@ -13,6 +13,15 @@ class Post extends Model
 
     protected $guarded = ['id'];
 
+    protected $appends = [
+        'image_url',
+    ];
+
+    public function getImageUrlAttribute()
+    {
+        return asset('storage/' . $this->image_path);
+    }
+
     public function user()
     {
         return $this->belongsTo(User::class);
