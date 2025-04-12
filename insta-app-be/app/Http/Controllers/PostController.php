@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StorePostRequest;
 use App\Http\Requests\UpdatePostRequest;
 use App\Models\Post;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class PostController extends Controller
@@ -58,6 +59,12 @@ class PostController extends Controller
     public function show(Post $post)
     {
         //
+        return apiResponse(
+            data: $post
+                ->load(['user', 'liked'])
+                ->loadCount(['likes', 'comments']),
+            message: 'Post retrieved successfully',
+        );
     }
 
     /**
@@ -66,5 +73,17 @@ class PostController extends Controller
     public function destroy(Post $post)
     {
         //
+        if ($post->user_id == Auth::id()) {
+            $post->delete();
+            return apiResponse(
+                message: 'Post deleted successfully',
+                statusCode: 200,
+            );
+        } else {
+            return apiErrorResponse(
+                message: 'You are not authorized to delete this post',
+                statusCode: 403,
+            );
+        }
     }
 }
