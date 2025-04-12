@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StorePostRequest;
 use App\Http\Requests\UpdatePostRequest;
 use App\Models\Post;
+use Illuminate\Support\Facades\Auth;
 
 class PostController extends Controller
 {
@@ -14,14 +15,13 @@ class PostController extends Controller
     public function index()
     {
         //
-    }
+        $posts = Post::query()
+            ->with(['user', 'liked'])
+            ->withCount(['likes', 'comments'])
+            ->latest()
+            ->paginate(10);
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
+        return apiPaginationResponse($posts);
     }
 
     /**
@@ -30,28 +30,32 @@ class PostController extends Controller
     public function store(StorePostRequest $request)
     {
         //
+        $validated = $request->validated();
+
+        try {
+            $post = Post::create([
+                'user_id' => Auth::id(),
+                'caption' => $validated['caption'],
+                'image_path' => $validated['image']->store('posts', 'public'),
+            ]);
+        } catch (\Throwable $th) {
+            return apiResponse(
+                message: $th->getMessage(),
+                statusCode: 422,
+            );
+        }
+
+        return apiResponse(
+            data: $post,
+            message: 'Post created successfully',
+            statusCode: 201,
+        );
     }
 
     /**
      * Display the specified resource.
      */
     public function show(Post $post)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Post $post)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(UpdatePostRequest $request, Post $post)
     {
         //
     }

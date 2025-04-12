@@ -14,5 +14,11 @@ Route::get('/ping', fn () => response()->json(['message' => 'pong']));
 Route::post('/register', [AuthController::class, 'register']);
 Route::apiResource('/auth', AuthController::class)->only(['store', 'destroy']);
 
+Route::apiResource('/posts', PostController::class)->only(['show', 'index']);
+
+Route::middleware('auth:sanctum')->group(function () {
+    Route::apiResource('/posts', PostController::class)->except(['update', 'show', 'index']);
+});
+
 Route::get('/posts', [PostController::class, 'index']);
 Route::get('/posts/{post}', [PostController::class, 'show']);
