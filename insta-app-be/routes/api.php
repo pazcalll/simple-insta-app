@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\LikeController;
 use App\Http\Controllers\PostController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -17,6 +18,7 @@ Route::apiResource('/auth', AuthController::class)->only(['store', 'destroy']);
 Route::apiResource('/posts', PostController::class)->only(['show', 'index']);
 
 Route::middleware('auth:sanctum')->group(function () {
+    Route::apiResource('/posts/{post}/likes', LikeController::class)->only(['store', 'destroy']);
     Route::apiResource('/posts', PostController::class)->except(['update', 'show', 'index']);
 });
 

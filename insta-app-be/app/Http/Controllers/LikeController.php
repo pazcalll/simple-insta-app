@@ -2,65 +2,58 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\RemoveLikeRequest;
 use App\Http\Requests\StoreLikeRequest;
 use App\Http\Requests\UpdateLikeRequest;
 use App\Models\Like;
+use App\Models\Post;
+use Illuminate\Support\Facades\Auth;
 
 class LikeController extends Controller
 {
     /**
-     * Display a listing of the resource.
-     */
-    public function index()
-    {
-        //
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreLikeRequest $request)
+    public function store(Post $post)
     {
         //
-    }
+        try {
+            $like = $post->likes()->create([
+                'user_id' => Auth::id(),
+            ]);
+        } catch (\Throwable $th) {
+            return apiResponse(
+                message: $th->getMessage(),
+                statusCode: 422,
+            );
+        }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Like $like)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Like $like)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(UpdateLikeRequest $request, Like $like)
-    {
-        //
+        return apiResponse(
+            data: $like,
+            message: 'Post liked successfully',
+            statusCode: 201,
+        );
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Like $like)
+    public function destroy(RemoveLikeRequest $request, Post $post, Like $like)
     {
         //
+        try {
+            $request->validated();
+
+            $like->delete();
+            return apiResponse(
+                message: 'Post unliked successfully',
+                statusCode: 200,
+            );
+        } catch (\Throwable $th) {
+            return apiResponse(
+                message: $th->getMessage(),
+                statusCode: 422,
+            );
+        }
     }
 }
